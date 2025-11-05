@@ -21,6 +21,7 @@ public class CrmApplicationDbContext : IdentityDbContext<ApplicationUser, Applic
     // DbSets for CRM entities
     public DbSet<Customer> Customers { get; set; }
     public DbSet<Clue> Clues { get; set; }
+    public DbSet<Opportunity> Opportunities { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -63,6 +64,27 @@ public class CrmApplicationDbContext : IdentityDbContext<ApplicationUser, Applic
             entity.Property(e => e.Follower).HasMaxLength(50);
             entity.Property(e => e.PoolId).HasMaxLength(50);
             entity.Property(e => e.ReasonId).HasMaxLength(50);
+            entity.Property(e => e.CreateUser).HasMaxLength(50);
+            entity.Property(e => e.UpdateUser).HasMaxLength(50);
+        });
+
+        // Configure Opportunity entity
+        modelBuilder.Entity<Opportunity>(entity =>
+        {
+            entity.ToTable("opportunity");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).HasMaxLength(200);
+            entity.Property(e => e.CustomerId).HasMaxLength(50);
+            entity.Property(e => e.Amount).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.Possible).HasColumnType("decimal(5,2)");
+            entity.Property(e => e.Products).HasMaxLength(500);
+            entity.Property(e => e.OrganizationId).HasMaxLength(50);
+            entity.Property(e => e.LastStage).HasMaxLength(50);
+            entity.Property(e => e.Stage).HasMaxLength(50);
+            entity.Property(e => e.ContactId).HasMaxLength(50);
+            entity.Property(e => e.Owner).HasMaxLength(50);
+            entity.Property(e => e.Follower).HasMaxLength(50);
+            entity.Property(e => e.FailureReason).HasMaxLength(500);
             entity.Property(e => e.CreateUser).HasMaxLength(50);
             entity.Property(e => e.UpdateUser).HasMaxLength(50);
         });

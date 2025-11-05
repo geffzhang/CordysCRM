@@ -58,10 +58,12 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IClueRepository, ClueRepository>();
+builder.Services.AddScoped<IOpportunityRepository, OpportunityRepository>();
 
 // Register services
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IClueService, ClueService>();
+builder.Services.AddScoped<IOpportunityService, OpportunityService>();
 
 // Register file storage service
 builder.Services.AddSingleton<IFileStorageService>(sp =>
