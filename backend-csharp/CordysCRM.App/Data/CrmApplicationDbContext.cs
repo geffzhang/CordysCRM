@@ -1,15 +1,19 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using CordysCRM.Framework.Data;
+using CordysCRM.Framework.Security;
 using CordysCRM.CRM.Domain;
 
 namespace CordysCRM.App.Data;
 
 /// <summary>
-/// Extended ApplicationDbContext that includes CRM entities
+/// Extended ApplicationDbContext that includes CRM entities and Identity
+/// Since we need Identity, this actually needs to extend IdentityDbContext
 /// </summary>
-public class CrmApplicationDbContext : ApplicationDbContext
+public class CrmApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
 {
-    public CrmApplicationDbContext(DbContextOptions<ApplicationDbContext> options) 
+    public CrmApplicationDbContext(DbContextOptions<CrmApplicationDbContext> options) 
         : base(options)
     {
     }
@@ -20,6 +24,10 @@ public class CrmApplicationDbContext : ApplicationDbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        
+        // Configure Identity tables with custom names (optional)
+        modelBuilder.Entity<ApplicationUser>().ToTable("AspNetUsers");
+        modelBuilder.Entity<ApplicationRole>().ToTable("AspNetRoles");
         
         // Configure Customer entity
         modelBuilder.Entity<Customer>(entity =>

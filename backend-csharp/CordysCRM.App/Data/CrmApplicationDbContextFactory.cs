@@ -11,7 +11,7 @@ public class CrmApplicationDbContextFactory : IDesignTimeDbContextFactory<CrmApp
 {
     public CrmApplicationDbContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        var optionsBuilder = new DbContextOptionsBuilder<CrmApplicationDbContext>();
         
         // Use a default connection string for migrations
         // This will be overridden at runtime

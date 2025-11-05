@@ -1,5 +1,4 @@
 using CordysCRM.CRM.Domain;
-using CordysCRM.Framework.Data;
 using CordysCRM.Framework.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +9,7 @@ namespace CordysCRM.CRM.Repositories;
 /// </summary>
 public class CustomerRepository : Repository<Customer>, ICustomerRepository
 {
-    public CustomerRepository(ApplicationDbContext context) : base(context)
+    public CustomerRepository(DbContext context) : base(context)
     {
     }
 

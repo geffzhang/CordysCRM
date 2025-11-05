@@ -1,4 +1,3 @@
-using CordysCRM.Framework.Data;
 using CordysCRM.Framework.Domain;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -11,10 +10,10 @@ namespace CordysCRM.Framework.Repositories;
 /// <typeparam name="TEntity">Entity type</typeparam>
 public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseModel
 {
-    protected readonly ApplicationDbContext _context;
+    protected readonly DbContext _context;
     protected readonly DbSet<TEntity> _dbSet;
 
-    public Repository(ApplicationDbContext context)
+    public Repository(DbContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _dbSet = context.Set<TEntity>();
