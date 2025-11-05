@@ -20,6 +20,7 @@ public class CrmApplicationDbContext : IdentityDbContext<ApplicationUser, Applic
 
     // DbSets for CRM entities
     public DbSet<Customer> Customers { get; set; }
+    public DbSet<Clue> Clues { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -39,6 +40,28 @@ public class CrmApplicationDbContext : IdentityDbContext<ApplicationUser, Applic
             entity.Property(e => e.OrganizationId).HasMaxLength(50);
             entity.Property(e => e.PoolId).HasMaxLength(50);
             entity.Property(e => e.Follower).HasMaxLength(50);
+            entity.Property(e => e.ReasonId).HasMaxLength(50);
+            entity.Property(e => e.CreateUser).HasMaxLength(50);
+            entity.Property(e => e.UpdateUser).HasMaxLength(50);
+        });
+
+        // Configure Clue entity
+        modelBuilder.Entity<Clue>(entity =>
+        {
+            entity.ToTable("clue");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).HasMaxLength(200);
+            entity.Property(e => e.Owner).HasMaxLength(50);
+            entity.Property(e => e.Stage).HasMaxLength(50);
+            entity.Property(e => e.LastStage).HasMaxLength(50);
+            entity.Property(e => e.Contact).HasMaxLength(100);
+            entity.Property(e => e.Phone).HasMaxLength(50);
+            entity.Property(e => e.Products).HasMaxLength(500);
+            entity.Property(e => e.OrganizationId).HasMaxLength(50);
+            entity.Property(e => e.TransitionType).HasMaxLength(20);
+            entity.Property(e => e.TransitionId).HasMaxLength(50);
+            entity.Property(e => e.Follower).HasMaxLength(50);
+            entity.Property(e => e.PoolId).HasMaxLength(50);
             entity.Property(e => e.ReasonId).HasMaxLength(50);
             entity.Property(e => e.CreateUser).HasMaxLength(50);
             entity.Property(e => e.UpdateUser).HasMaxLength(50);
