@@ -49,7 +49,7 @@ public class DashboardModuleController : ControllerBase
     }
 
     /// <summary>
-    /// 仪表板-刪除文件夹 (Delete Dashboard Folder)
+    /// 仪表板-删除文件夹 (Delete Dashboard Folder)
     /// </summary>
     [HttpPost("delete")]
     // [RequiresPermission(PermissionConstants.DashboardDelete)]

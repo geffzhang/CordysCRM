@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using CordysCRM.Framework.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -93,12 +94,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-// Placeholder for DbContext - will be implemented in Framework
-public partial class ApplicationDbContext : DbContext
-{
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
-    {
-    }
-}

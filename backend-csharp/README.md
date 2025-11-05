@@ -134,7 +134,7 @@ dotnet run
 - [ ] Repository 层实现
 - [ ] DTO 和 Domain 模型转换
 - [ ] 单元测试
-- [ &#93; 集成测试
+- [ ] 集成测试
 
 ## 开发指南 (Development Guidelines)
 
