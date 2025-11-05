@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using CordysCRM.Framework.Domain;
 
 namespace CordysCRM.Framework.Data;
 
@@ -13,22 +14,52 @@ public class ApplicationDbContext : DbContext
     {
     }
 
-    // DbSets will be added here as entities are migrated
-    // Example:
-    // public DbSet<User> Users { get; set; }
-    // public DbSet<Customer> Customers { get; set; }
-    // public DbSet<Opportunity> Opportunities { get; set; }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // Entity configurations will be added here
-        // Example:
-        // modelBuilder.Entity<User>(entity => {
-        //     entity.ToTable("users");
-        //     entity.HasKey(e => e.Id);
-        //     entity.Property(e => e.Username).IsRequired().HasMaxLength(100);
-        // });
+        // Entity configurations will be applied when entities are registered
+        // This allows the consuming project to add entities dynamically
+    }
+
+    /// <summary>
+    /// Override SaveChanges to automatically set audit fields
+    /// </summary>
+    public override int SaveChanges()
+    {
+        SetAuditFields();
+        return base.SaveChanges();
+    }
+
+    /// <summary>
+    /// Override SaveChangesAsync to automatically set audit fields
+    /// </summary>
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        SetAuditFields();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void SetAuditFields()
+    {
+        var entries = ChangeTracker.Entries()
+            .Where(e => e.Entity is Framework.Domain.BaseModel && 
+                       (e.State == EntityState.Added || e.State == EntityState.Modified));
+
+        var currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+        foreach (var entry in entries)
+        {
+            var entity = (Framework.Domain.BaseModel)entry.Entity;
+
+            if (entry.State == EntityState.Added)
+            {
+                entity.CreateTime = currentTime;
+                // entity.CreateUser should be set from the current user context
+            }
+
+            entity.UpdateTime = currentTime;
+            // entity.UpdateUser should be set from the current user context
+        }
     }
 }

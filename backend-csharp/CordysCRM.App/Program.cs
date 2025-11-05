@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using CordysCRM.Framework.Data;
+using CordysCRM.Framework.Repositories;
+using CordysCRM.CRM.Repositories;
+using CordysCRM.CRM.Services;
+using CordysCRM.App.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +13,13 @@ builder.Services.AddControllers();
 // Add HttpContextAccessor for session management
 builder.Services.AddHttpContextAccessor();
 
+// Register repositories
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+
+// Register services
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+
 // Add API documentation (Swagger/OpenAPI)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -17,7 +28,7 @@ builder.Services.AddSwaggerGen();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (!string.IsNullOrEmpty(connectionString))
 {
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    builder.Services.AddDbContext<ApplicationDbContext, CrmApplicationDbContext>(options =>
         options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 }
 
