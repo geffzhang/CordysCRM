@@ -62,6 +62,13 @@ builder.Services.AddScoped<IOpportunityRepository, OpportunityRepository>();
 builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IModuleFieldRepository, ModuleFieldRepository>();
+builder.Services.AddScoped<IFollowUpPlanRepository, FollowUpPlanRepository>();
+builder.Services.AddScoped<IFollowUpRecordRepository, FollowUpRecordRepository>();
+builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
+builder.Services.AddScoped<IDashboardModuleRepository, DashboardModuleRepository>();
+builder.Services.AddScoped<IDashboardCollectionRepository, DashboardCollectionRepository>();
+builder.Services.AddScoped<ISearchFieldMaskConfigRepository, SearchFieldMaskConfigRepository>();
+builder.Services.AddScoped<IUserSearchConfigRepository, UserSearchConfigRepository>();
 
 // Register services
 builder.Services.AddScoped<ICustomerService, CustomerService>();
@@ -70,6 +77,14 @@ builder.Services.AddScoped<IOpportunityService, OpportunityService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IModuleFieldService, ModuleFieldService>();
+builder.Services.AddScoped<IFollowUpPlanService, FollowUpPlanService>();
+builder.Services.AddScoped<IFollowUpRecordService, FollowUpRecordService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IDashboardModuleService, DashboardModuleService>();
+builder.Services.AddScoped<IGlobalSearchService, GlobalSearchService>();
+
+// Register utilities
+builder.Services.AddScoped<SessionUtils>();
 
 // Register file storage service
 builder.Services.AddSingleton<IFileStorageService>(sp =>

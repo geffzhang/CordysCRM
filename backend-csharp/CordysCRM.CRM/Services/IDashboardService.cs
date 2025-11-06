@@ -40,6 +40,11 @@ public interface IDashboardService
     Task<List<DashboardPageResponse>> GetListAsync(string organizationId, int page = 1, int pageSize = 20);
 
     /// <summary>
+    /// 获取仪表板列表（含收藏状态） (Get Dashboard List with Collection Status)
+    /// </summary>
+    Task<List<DashboardPageResponse>> GetListAsync(string organizationId, string? userId, int page = 1, int pageSize = 20);
+
+    /// <summary>
     /// 收藏仪表板 (Collect Dashboard)
     /// </summary>
     Task CollectAsync(string id, string userId);

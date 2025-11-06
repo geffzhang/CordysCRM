@@ -18,36 +18,36 @@ public class GlobalSearchService : IGlobalSearchService
 
     public async Task<List<GlobalOpportunityResponse>> SearchOpportunityAsync(string keyword, string organizationId, string userId, int page = 1, int pageSize = 20)
     {
-        // TODO: Implement actual search logic
-        _logger.LogInformation("SearchOpportunityAsync called with keyword: {Keyword}", keyword);
+        _logger.LogInformation("SearchOpportunityAsync called");
+        // TODO: Implement actual search logic with proper filtering and security
         return await Task.FromResult(new List<GlobalOpportunityResponse>());
     }
 
     public async Task<List<GlobalCustomerResponse>> SearchCustomerAsync(string keyword, string organizationId, string userId, int page = 1, int pageSize = 20)
     {
-        // TODO: Implement actual search logic
-        _logger.LogInformation("SearchCustomerAsync called with keyword: {Keyword}", keyword);
+        _logger.LogInformation("SearchCustomerAsync called");
+        // TODO: Implement actual search logic with proper filtering and security
         return await Task.FromResult(new List<GlobalCustomerResponse>());
     }
 
     public async Task<List<GlobalClueResponse>> SearchClueAsync(string keyword, string organizationId, string userId, int page = 1, int pageSize = 20)
     {
-        // TODO: Implement actual search logic
-        _logger.LogInformation("SearchClueAsync called with keyword: {Keyword}", keyword);
+        _logger.LogInformation("SearchClueAsync called");
+        // TODO: Implement actual search logic with proper filtering and security
         return await Task.FromResult(new List<GlobalClueResponse>());
     }
 
     public async Task<List<GlobalContactResponse>> SearchContactAsync(string keyword, string organizationId, string userId, int page = 1, int pageSize = 20)
     {
-        // TODO: Implement actual search logic
-        _logger.LogInformation("SearchContactAsync called with keyword: {Keyword}", keyword);
+        _logger.LogInformation("SearchContactAsync called");
+        // TODO: Implement actual search logic with proper filtering and security
         return await Task.FromResult(new List<GlobalContactResponse>());
     }
 
     public async Task<Dictionary<string, int>> SearchModuleCountAsync(string keyword, string organizationId, string userId)
     {
-        // TODO: Implement actual search count logic
-        _logger.LogInformation("SearchModuleCountAsync called with keyword: {Keyword}", keyword);
+        _logger.LogInformation("SearchModuleCountAsync called");
+        // TODO: Implement actual search count logic with proper filtering and security
         return await Task.FromResult(new Dictionary<string, int>
         {
             { "opportunity", 0 },

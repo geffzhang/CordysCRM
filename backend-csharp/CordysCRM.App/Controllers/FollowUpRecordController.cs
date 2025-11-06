@@ -1,5 +1,6 @@
 using CordysCRM.CRM.DTOs.Follow;
 using CordysCRM.CRM.Services;
+using CordysCRM.Framework.Security;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CordysCRM.App.Controllers;
@@ -15,13 +16,16 @@ public class FollowUpRecordController : ControllerBase
 {
     private readonly ILogger<FollowUpRecordController> _logger;
     private readonly IFollowUpRecordService _followUpRecordService;
+    private readonly SessionUtils _sessionUtils;
 
     public FollowUpRecordController(
         ILogger<FollowUpRecordController> logger,
-        IFollowUpRecordService followUpRecordService)
+        IFollowUpRecordService followUpRecordService,
+        SessionUtils sessionUtils)
     {
         _logger = logger;
         _followUpRecordService = followUpRecordService;
+        _sessionUtils = sessionUtils;
     }
 
     /// <summary>
@@ -50,12 +54,15 @@ public class FollowUpRecordController : ControllerBase
     [HttpPost("page")]
     public async Task<IActionResult> List([FromBody] object request)
     {
-        _logger.LogInformation("List called");
-        // TODO: Get organizationId and userId from session/context
-        var organizationId = "default-org";
-        var userId = "default-user";
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
         
-        var records = await _followUpRecordService.GetListAsync(organizationId, userId);
+        _logger.LogInformation("List called for user {UserId}", user.Id);
+        
+        var records = await _followUpRecordService.GetListAsync(user.OrganizationId, user.Id);
         return Ok(new { list = records, total = records.Count });
     }
 
@@ -65,7 +72,7 @@ public class FollowUpRecordController : ControllerBase
     [HttpGet("delete/{id}")]
     public async Task<IActionResult> Delete(string id)
     {
-        _logger.LogInformation("Delete called with id: {Id}", id);
+        _logger.LogInformation("Delete called for record");
         await _followUpRecordService.DeleteAsync(id);
         return Ok();
     }
@@ -76,9 +83,14 @@ public class FollowUpRecordController : ControllerBase
     [HttpGet("get/{id}")]
     public async Task<IActionResult> Get(string id)
     {
-        _logger.LogInformation("Get called with id: {Id}", id);
-        var organizationId = "default-org"; // TODO: Get from session/context
-        var record = await _followUpRecordService.GetAsync(id, organizationId);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
+        _logger.LogInformation("Get called for record");
+        var record = await _followUpRecordService.GetAsync(id, user.OrganizationId);
         return Ok(record);
     }
 
@@ -88,10 +100,14 @@ public class FollowUpRecordController : ControllerBase
     [HttpPost("update")]
     public async Task<IActionResult> Update([FromBody] FollowUpRecordUpdateRequest request)
     {
-        _logger.LogInformation("Update called for id: {Id}", request.Id);
-        var userId = "default-user"; // TODO: Get from session/context
-        var organizationId = "default-org"; // TODO: Get from session/context
-        var record = await _followUpRecordService.UpdateAsync(request, userId, organizationId);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
+        _logger.LogInformation("Update called for record");
+        var record = await _followUpRecordService.UpdateAsync(request, user.Id, user.OrganizationId);
         return Ok(record);
     }
 
@@ -101,10 +117,14 @@ public class FollowUpRecordController : ControllerBase
     [HttpPost("add")]
     public async Task<IActionResult> Add([FromBody] FollowUpRecordAddRequest request)
     {
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
         _logger.LogInformation("Add called");
-        var userId = "default-user"; // TODO: Get from session/context
-        var organizationId = "default-org"; // TODO: Get from session/context
-        var record = await _followUpRecordService.AddAsync(request, userId, organizationId);
+        var record = await _followUpRecordService.AddAsync(request, user.Id, user.OrganizationId);
         return Ok(record);
     }
 }

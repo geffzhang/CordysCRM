@@ -11,10 +11,14 @@ namespace CordysCRM.CRM.Services;
 public class DashboardService : IDashboardService
 {
     private readonly IDashboardRepository _repository;
+    private readonly IDashboardCollectionRepository _collectionRepository;
 
-    public DashboardService(IDashboardRepository repository)
+    public DashboardService(
+        IDashboardRepository repository,
+        IDashboardCollectionRepository collectionRepository)
     {
         _repository = repository;
+        _collectionRepository = collectionRepository;
     }
 
     public async Task<Dashboard> AddAsync(DashboardAddRequest request, string organizationId, string userId)
@@ -89,7 +93,19 @@ public class DashboardService : IDashboardService
 
     public async Task<List<DashboardPageResponse>> GetListAsync(string organizationId, int page = 1, int pageSize = 20)
     {
+        return await GetListAsync(organizationId, null, page, pageSize);
+    }
+
+    public async Task<List<DashboardPageResponse>> GetListAsync(string organizationId, string? userId, int page = 1, int pageSize = 20)
+    {
         var dashboards = await _repository.QueryAsync(organizationId, page, pageSize);
+        
+        // Get user's collections if userId is provided
+        var userCollections = userId != null 
+            ? await _collectionRepository.GetByUserIdAsync(userId) 
+            : new List<DashboardCollection>();
+        
+        var collectedDashboardIds = userCollections.Select(c => c.DashboardId).ToHashSet();
         
         return dashboards.Select(d => new DashboardPageResponse
         {
@@ -101,19 +117,31 @@ public class DashboardService : IDashboardService
             Description = d.Description,
             CreateUser = d.CreateUser,
             CreateTime = d.CreateTime,
-            IsCollected = false // TODO: Check if user has collected this dashboard
+            IsCollected = d.Id != null && collectedDashboardIds.Contains(d.Id)
         }).ToList();
     }
 
     public async Task CollectAsync(string id, string userId)
     {
-        // TODO: Implement dashboard collection logic
-        await Task.CompletedTask;
+        // Check if already collected
+        if (await _collectionRepository.IsCollectedAsync(id, userId))
+        {
+            return; // Already collected, do nothing
+        }
+
+        var collection = new DashboardCollection
+        {
+            DashboardId = id,
+            UserId = userId,
+            CreateTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+            UpdateTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+        };
+
+        await _collectionRepository.AddAsync(collection);
     }
 
     public async Task UnCollectAsync(string id, string userId)
     {
-        // TODO: Implement dashboard un-collection logic
-        await Task.CompletedTask;
+        await _collectionRepository.DeleteAsync(id, userId);
     }
 }

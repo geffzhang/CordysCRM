@@ -1,4 +1,5 @@
 using CordysCRM.CRM.Services;
+using CordysCRM.Framework.Security;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CordysCRM.App.Controllers;
@@ -14,13 +15,16 @@ public class GlobalSearchController : ControllerBase
 {
     private readonly ILogger<GlobalSearchController> _logger;
     private readonly IGlobalSearchService _globalSearchService;
+    private readonly SessionUtils _sessionUtils;
 
     public GlobalSearchController(
         ILogger<GlobalSearchController> logger,
-        IGlobalSearchService globalSearchService)
+        IGlobalSearchService globalSearchService,
+        SessionUtils sessionUtils)
     {
         _logger = logger;
         _globalSearchService = globalSearchService;
+        _sessionUtils = sessionUtils;
     }
 
     /// <summary>
@@ -29,10 +33,14 @@ public class GlobalSearchController : ControllerBase
     [HttpPost("opportunity")]
     public async Task<IActionResult> SearchOpportunity([FromBody] SearchRequest request)
     {
-        _logger.LogInformation("Global Search Opportunity called with keyword: {Keyword}", request.Keyword);
-        var organizationId = "default-org"; // TODO: Get from session/context
-        var userId = "default-user"; // TODO: Get from session/context
-        var results = await _globalSearchService.SearchOpportunityAsync(request.Keyword ?? "", organizationId, userId, request.Page, request.PageSize);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
+        _logger.LogInformation("Global Search Opportunity called");
+        var results = await _globalSearchService.SearchOpportunityAsync(request.Keyword ?? "", user.OrganizationId, user.Id, request.Page, request.PageSize);
         return Ok(new { list = results, total = results.Count });
     }
 
@@ -42,10 +50,14 @@ public class GlobalSearchController : ControllerBase
     [HttpPost("account")]
     public async Task<IActionResult> SearchCustomer([FromBody] SearchRequest request)
     {
-        _logger.LogInformation("Global Search Customer called with keyword: {Keyword}", request.Keyword);
-        var organizationId = "default-org"; // TODO: Get from session/context
-        var userId = "default-user"; // TODO: Get from session/context
-        var results = await _globalSearchService.SearchCustomerAsync(request.Keyword ?? "", organizationId, userId, request.Page, request.PageSize);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
+        _logger.LogInformation("Global Search Customer called");
+        var results = await _globalSearchService.SearchCustomerAsync(request.Keyword ?? "", user.OrganizationId, user.Id, request.Page, request.PageSize);
         return Ok(new { list = results, total = results.Count });
     }
 
@@ -55,10 +67,14 @@ public class GlobalSearchController : ControllerBase
     [HttpPost("lead")]
     public async Task<IActionResult> SearchClue([FromBody] SearchRequest request)
     {
-        _logger.LogInformation("Global Search Clue called with keyword: {Keyword}", request.Keyword);
-        var organizationId = "default-org"; // TODO: Get from session/context
-        var userId = "default-user"; // TODO: Get from session/context
-        var results = await _globalSearchService.SearchClueAsync(request.Keyword ?? "", organizationId, userId, request.Page, request.PageSize);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
+        _logger.LogInformation("Global Search Clue called");
+        var results = await _globalSearchService.SearchClueAsync(request.Keyword ?? "", user.OrganizationId, user.Id, request.Page, request.PageSize);
         return Ok(new { list = results, total = results.Count });
     }
 
@@ -68,10 +84,14 @@ public class GlobalSearchController : ControllerBase
     [HttpPost("contact")]
     public async Task<IActionResult> SearchContact([FromBody] SearchRequest request)
     {
-        _logger.LogInformation("Global Search Contact called with keyword: {Keyword}", request.Keyword);
-        var organizationId = "default-org"; // TODO: Get from session/context
-        var userId = "default-user"; // TODO: Get from session/context
-        var results = await _globalSearchService.SearchContactAsync(request.Keyword ?? "", organizationId, userId, request.Page, request.PageSize);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
+        _logger.LogInformation("Global Search Contact called");
+        var results = await _globalSearchService.SearchContactAsync(request.Keyword ?? "", user.OrganizationId, user.Id, request.Page, request.PageSize);
         return Ok(new { list = results, total = results.Count });
     }
 
@@ -81,10 +101,14 @@ public class GlobalSearchController : ControllerBase
     [HttpPost("module/count")]
     public async Task<IActionResult> SearchModuleCount([FromQuery] string keyword)
     {
-        _logger.LogInformation("Global Search Module Count called with keyword: {Keyword}", keyword);
-        var organizationId = "default-org"; // TODO: Get from session/context
-        var userId = "default-user"; // TODO: Get from session/context
-        var counts = await _globalSearchService.SearchModuleCountAsync(keyword, organizationId, userId);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
+        _logger.LogInformation("Global Search Module Count called");
+        var counts = await _globalSearchService.SearchModuleCountAsync(keyword, user.OrganizationId, user.Id);
         return Ok(counts);
     }
 }

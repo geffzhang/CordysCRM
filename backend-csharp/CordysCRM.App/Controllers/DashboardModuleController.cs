@@ -1,5 +1,6 @@
 using CordysCRM.CRM.DTOs.Dashboard;
 using CordysCRM.CRM.Services;
+using CordysCRM.Framework.Security;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CordysCRM.App.Controllers;
@@ -15,13 +16,16 @@ public class DashboardModuleController : ControllerBase
 {
     private readonly ILogger<DashboardModuleController> _logger;
     private readonly IDashboardModuleService _dashboardModuleService;
+    private readonly SessionUtils _sessionUtils;
 
     public DashboardModuleController(
         ILogger<DashboardModuleController> logger,
-        IDashboardModuleService dashboardModuleService)
+        IDashboardModuleService dashboardModuleService,
+        SessionUtils sessionUtils)
     {
         _logger = logger;
         _dashboardModuleService = dashboardModuleService;
+        _sessionUtils = sessionUtils;
     }
 
     /// <summary>
@@ -31,10 +35,14 @@ public class DashboardModuleController : ControllerBase
     // [RequiresPermission(PermissionConstants.DashboardAdd)]
     public async Task<IActionResult> AddFileModule([FromBody] DashboardModuleAddRequest request)
     {
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
         _logger.LogInformation("AddFileModule called");
-        var organizationId = "default-org"; // TODO: Get from session/context
-        var userId = "default-user"; // TODO: Get from session/context
-        await _dashboardModuleService.AddFileModuleAsync(request.Name, request.ParentId, organizationId, userId);
+        await _dashboardModuleService.AddFileModuleAsync(request.Name, request.ParentId, user.OrganizationId, user.Id);
         return Ok();
     }
 
@@ -45,9 +53,14 @@ public class DashboardModuleController : ControllerBase
     // [RequiresPermission(PermissionConstants.DashboardEdit)]
     public async Task<IActionResult> Rename([FromBody] DashboardModuleRenameRequest request)
     {
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
         _logger.LogInformation("Rename called");
-        var userId = "default-user"; // TODO: Get from session/context
-        await _dashboardModuleService.RenameAsync(request.Id, request.NewName, userId);
+        await _dashboardModuleService.RenameAsync(request.Id, request.NewName, user.Id);
         return Ok();
     }
 
@@ -58,10 +71,14 @@ public class DashboardModuleController : ControllerBase
     // [RequiresPermission(PermissionConstants.DashboardDelete)]
     public async Task<IActionResult> DeleteDashboardModule([FromBody] List<string> ids)
     {
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
         _logger.LogInformation("DeleteDashboardModule called with {Count} ids", ids.Count);
-        var userId = "default-user"; // TODO: Get from session/context
-        var organizationId = "default-org"; // TODO: Get from session/context
-        await _dashboardModuleService.DeleteAsync(ids, userId, organizationId);
+        await _dashboardModuleService.DeleteAsync(ids, user.Id, user.OrganizationId);
         return Ok();
     }
 
@@ -72,10 +89,14 @@ public class DashboardModuleController : ControllerBase
     // [RequiresPermission(PermissionConstants.DashboardRead)]
     public async Task<IActionResult> GetTree()
     {
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
         _logger.LogInformation("GetTree called");
-        var userId = "default-user"; // TODO: Get from session/context
-        var organizationId = "default-org"; // TODO: Get from session/context
-        var tree = await _dashboardModuleService.GetTreeAsync(userId, organizationId);
+        var tree = await _dashboardModuleService.GetTreeAsync(user.Id, user.OrganizationId);
         return Ok(tree);
     }
 
@@ -86,10 +107,14 @@ public class DashboardModuleController : ControllerBase
     // [RequiresPermission(PermissionConstants.DashboardRead)]
     public async Task<IActionResult> ModuleCount()
     {
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
         _logger.LogInformation("ModuleCount called");
-        var userId = "default-user"; // TODO: Get from session/context
-        var organizationId = "default-org"; // TODO: Get from session/context
-        var count = await _dashboardModuleService.GetModuleCountAsync(userId, organizationId);
+        var count = await _dashboardModuleService.GetModuleCountAsync(user.Id, user.OrganizationId);
         return Ok(count);
     }
 
@@ -100,9 +125,14 @@ public class DashboardModuleController : ControllerBase
     // [RequiresPermission(PermissionConstants.DashboardEdit)]
     public async Task<IActionResult> MoveNode([FromBody] DashboardModuleNodeMoveRequest request)
     {
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
         _logger.LogInformation("MoveNode called");
-        var userId = "default-user"; // TODO: Get from session/context
-        await _dashboardModuleService.MoveNodeAsync(request.Id, request.TargetId, userId);
+        await _dashboardModuleService.MoveNodeAsync(request.Id, request.TargetId, user.Id);
         return Ok();
     }
 }

@@ -1,5 +1,6 @@
 using CordysCRM.CRM.DTOs.Follow;
 using CordysCRM.CRM.Services;
+using CordysCRM.Framework.Security;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CordysCRM.App.Controllers;
@@ -15,13 +16,16 @@ public class FollowUpPlanController : ControllerBase
 {
     private readonly ILogger<FollowUpPlanController> _logger;
     private readonly IFollowUpPlanService _followUpPlanService;
+    private readonly SessionUtils _sessionUtils;
 
     public FollowUpPlanController(
         ILogger<FollowUpPlanController> logger,
-        IFollowUpPlanService followUpPlanService)
+        IFollowUpPlanService followUpPlanService,
+        SessionUtils sessionUtils)
     {
         _logger = logger;
         _followUpPlanService = followUpPlanService;
+        _sessionUtils = sessionUtils;
     }
 
     /// <summary>
@@ -50,12 +54,15 @@ public class FollowUpPlanController : ControllerBase
     [HttpPost("page")]
     public async Task<IActionResult> List([FromBody] object request)
     {
-        _logger.LogInformation("List called");
-        // TODO: Get organizationId and userId from session/context
-        var organizationId = "default-org";
-        var userId = "default-user";
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
         
-        var plans = await _followUpPlanService.GetListAsync(organizationId, userId);
+        _logger.LogInformation("List called for user {UserId}", user.Id);
+        
+        var plans = await _followUpPlanService.GetListAsync(user.OrganizationId, user.Id);
         return Ok(new { list = plans, total = plans.Count });
     }
 
@@ -65,7 +72,7 @@ public class FollowUpPlanController : ControllerBase
     [HttpGet("delete/{id}")]
     public async Task<IActionResult> Delete(string id)
     {
-        _logger.LogInformation("Delete called with id: {Id}", id);
+        _logger.LogInformation("Delete called for plan");
         await _followUpPlanService.DeleteAsync(id);
         return Ok();
     }
@@ -76,9 +83,14 @@ public class FollowUpPlanController : ControllerBase
     [HttpPost("status/update")]
     public async Task<IActionResult> UpdateStatus([FromBody] FollowUpPlanStatusRequest request)
     {
-        _logger.LogInformation("UpdateStatus called for id: {Id}", request.Id);
-        var userId = "default-user"; // TODO: Get from session/context
-        await _followUpPlanService.UpdateStatusAsync(request, userId);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
+        _logger.LogInformation("UpdateStatus called for plan");
+        await _followUpPlanService.UpdateStatusAsync(request, user.Id);
         return Ok();
     }
 
@@ -88,9 +100,14 @@ public class FollowUpPlanController : ControllerBase
     [HttpGet("get/{id}")]
     public async Task<IActionResult> Get(string id)
     {
-        _logger.LogInformation("Get called with id: {Id}", id);
-        var organizationId = "default-org"; // TODO: Get from session/context
-        var plan = await _followUpPlanService.GetAsync(id, organizationId);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
+        _logger.LogInformation("Get called for plan");
+        var plan = await _followUpPlanService.GetAsync(id, user.OrganizationId);
         return Ok(plan);
     }
 
@@ -100,10 +117,14 @@ public class FollowUpPlanController : ControllerBase
     [HttpPost("update")]
     public async Task<IActionResult> Update([FromBody] FollowUpPlanUpdateRequest request)
     {
-        _logger.LogInformation("Update called for id: {Id}", request.Id);
-        var userId = "default-user"; // TODO: Get from session/context
-        var organizationId = "default-org"; // TODO: Get from session/context
-        var plan = await _followUpPlanService.UpdateAsync(request, userId, organizationId);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
+        _logger.LogInformation("Update called for plan");
+        var plan = await _followUpPlanService.UpdateAsync(request, user.Id, user.OrganizationId);
         return Ok(plan);
     }
 
@@ -113,10 +134,14 @@ public class FollowUpPlanController : ControllerBase
     [HttpPost("add")]
     public async Task<IActionResult> Add([FromBody] FollowUpPlanAddRequest request)
     {
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
         _logger.LogInformation("Add called");
-        var userId = "default-user"; // TODO: Get from session/context
-        var organizationId = "default-org"; // TODO: Get from session/context
-        var plan = await _followUpPlanService.AddAsync(request, userId, organizationId);
+        var plan = await _followUpPlanService.AddAsync(request, user.Id, user.OrganizationId);
         return Ok(plan);
     }
 }

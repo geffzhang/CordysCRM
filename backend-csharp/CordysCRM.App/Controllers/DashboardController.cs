@@ -1,5 +1,6 @@
 using CordysCRM.CRM.DTOs.Dashboard;
 using CordysCRM.CRM.Services;
+using CordysCRM.Framework.Security;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CordysCRM.App.Controllers;
@@ -15,13 +16,16 @@ public class DashboardController : ControllerBase
 {
     private readonly ILogger<DashboardController> _logger;
     private readonly IDashboardService _dashboardService;
+    private readonly SessionUtils _sessionUtils;
 
     public DashboardController(
         ILogger<DashboardController> logger,
-        IDashboardService dashboardService)
+        IDashboardService dashboardService,
+        SessionUtils sessionUtils)
     {
         _logger = logger;
         _dashboardService = dashboardService;
+        _sessionUtils = sessionUtils;
     }
 
     /// <summary>
@@ -30,10 +34,14 @@ public class DashboardController : ControllerBase
     [HttpPost("add")]
     public async Task<IActionResult> Add([FromBody] DashboardAddRequest request)
     {
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
         _logger.LogInformation("Add Dashboard called");
-        var organizationId = "default-org"; // TODO: Get from session/context
-        var userId = "default-user"; // TODO: Get from session/context
-        var dashboard = await _dashboardService.AddAsync(request, organizationId, userId);
+        var dashboard = await _dashboardService.AddAsync(request, user.OrganizationId, user.Id);
         return Ok(dashboard);
     }
 
@@ -43,7 +51,7 @@ public class DashboardController : ControllerBase
     [HttpGet("detail/{id}")]
     public async Task<IActionResult> Detail(string id)
     {
-        _logger.LogInformation("Get Dashboard Detail called with id: {Id}", id);
+        _logger.LogInformation("Get Dashboard Detail called");
         var dashboard = await _dashboardService.GetAsync(id);
         return Ok(dashboard);
     }
@@ -54,10 +62,14 @@ public class DashboardController : ControllerBase
     [HttpPost("update")]
     public async Task<IActionResult> Update([FromBody] DashboardUpdateRequest request)
     {
-        _logger.LogInformation("Update Dashboard called for id: {Id}", request.Id);
-        var organizationId = "default-org"; // TODO: Get from session/context
-        var userId = "default-user"; // TODO: Get from session/context
-        await _dashboardService.UpdateAsync(request, organizationId, userId);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
+        _logger.LogInformation("Update Dashboard called");
+        await _dashboardService.UpdateAsync(request, user.OrganizationId, user.Id);
         return Ok();
     }
 
@@ -67,10 +79,14 @@ public class DashboardController : ControllerBase
     [HttpPost("rename")]
     public async Task<IActionResult> Rename([FromBody] DashboardRenameRequest request)
     {
-        _logger.LogInformation("Rename Dashboard called for id: {Id}", request.Id);
-        var userId = "default-user"; // TODO: Get from session/context
-        var organizationId = "default-org"; // TODO: Get from session/context
-        await _dashboardService.RenameAsync(request, userId, organizationId);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
+        _logger.LogInformation("Rename Dashboard called");
+        await _dashboardService.RenameAsync(request, user.Id, user.OrganizationId);
         return Ok();
     }
 
@@ -80,7 +96,7 @@ public class DashboardController : ControllerBase
     [HttpGet("delete/{id}")]
     public async Task<IActionResult> Delete(string id)
     {
-        _logger.LogInformation("Delete Dashboard called with id: {Id}", id);
+        _logger.LogInformation("Delete Dashboard called");
         await _dashboardService.DeleteAsync(id);
         return Ok();
     }
@@ -91,9 +107,14 @@ public class DashboardController : ControllerBase
     [HttpPost("page")]
     public async Task<IActionResult> List()
     {
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
         _logger.LogInformation("Get Dashboard List called");
-        var organizationId = "default-org"; // TODO: Get from session/context
-        var dashboards = await _dashboardService.GetListAsync(organizationId);
+        var dashboards = await _dashboardService.GetListAsync(user.OrganizationId, user.Id);
         return Ok(new { list = dashboards, total = dashboards.Count });
     }
 
@@ -103,9 +124,14 @@ public class DashboardController : ControllerBase
     [HttpGet("collect/{id}")]
     public async Task<IActionResult> Collect(string id)
     {
-        _logger.LogInformation("Collect Dashboard called with id: {Id}", id);
-        var userId = "default-user"; // TODO: Get from session/context
-        await _dashboardService.CollectAsync(id, userId);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
+        _logger.LogInformation("Collect Dashboard called");
+        await _dashboardService.CollectAsync(id, user.Id);
         return Ok();
     }
 
@@ -115,9 +141,14 @@ public class DashboardController : ControllerBase
     [HttpGet("un-collect/{id}")]
     public async Task<IActionResult> UnCollect(string id)
     {
-        _logger.LogInformation("Un-collect Dashboard called with id: {Id}", id);
-        var userId = "default-user"; // TODO: Get from session/context
-        await _dashboardService.UnCollectAsync(id, userId);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
+        _logger.LogInformation("Un-collect Dashboard called");
+        await _dashboardService.UnCollectAsync(id, user.Id);
         return Ok();
     }
 }
