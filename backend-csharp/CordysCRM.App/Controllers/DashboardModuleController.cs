@@ -1,3 +1,6 @@
+using CordysCRM.CRM.DTOs.Dashboard;
+using CordysCRM.CRM.Services;
+using CordysCRM.Framework.Security;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CordysCRM.App.Controllers;
@@ -12,14 +15,17 @@ namespace CordysCRM.App.Controllers;
 public class DashboardModuleController : ControllerBase
 {
     private readonly ILogger<DashboardModuleController> _logger;
-    // private readonly IDashboardModuleService _dashboardModuleService;
+    private readonly IDashboardModuleService _dashboardModuleService;
+    private readonly SessionUtils _sessionUtils;
 
     public DashboardModuleController(
-        ILogger<DashboardModuleController> logger)
-        // IDashboardModuleService dashboardModuleService)
+        ILogger<DashboardModuleController> logger,
+        IDashboardModuleService dashboardModuleService,
+        SessionUtils sessionUtils)
     {
         _logger = logger;
-        // _dashboardModuleService = dashboardModuleService;
+        _dashboardModuleService = dashboardModuleService;
+        _sessionUtils = sessionUtils;
     }
 
     /// <summary>
@@ -27,12 +33,17 @@ public class DashboardModuleController : ControllerBase
     /// </summary>
     [HttpPost("add")]
     // [RequiresPermission(PermissionConstants.DashboardAdd)]
-    public IActionResult AddFileModule([FromBody] DashboardModuleAddRequest request)
+    public async Task<IActionResult> AddFileModule([FromBody] DashboardModuleAddRequest request)
     {
-        // TODO: Implement service call
-        // var result = _dashboardModuleService.AddFileModule(request, organizationId, userId);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
         _logger.LogInformation("AddFileModule called");
-        return Ok(new { message = "Not yet implemented" });
+        await _dashboardModuleService.AddFileModuleAsync(request.Name, request.ParentId, user.OrganizationId, user.Id);
+        return Ok();
     }
 
     /// <summary>
@@ -40,11 +51,16 @@ public class DashboardModuleController : ControllerBase
     /// </summary>
     [HttpPost("rename")]
     // [RequiresPermission(PermissionConstants.DashboardEdit)]
-    public IActionResult Rename([FromBody] DashboardModuleRenameRequest request)
+    public async Task<IActionResult> Rename([FromBody] DashboardModuleRenameRequest request)
     {
-        // TODO: Implement service call
-        // _dashboardModuleService.Rename(request, userId);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
         _logger.LogInformation("Rename called");
+        await _dashboardModuleService.RenameAsync(request.Id, request.NewName, user.Id);
         return Ok();
     }
 
@@ -53,11 +69,16 @@ public class DashboardModuleController : ControllerBase
     /// </summary>
     [HttpPost("delete")]
     // [RequiresPermission(PermissionConstants.DashboardDelete)]
-    public IActionResult DeleteDashboardModule([FromBody] List<string> ids)
+    public async Task<IActionResult> DeleteDashboardModule([FromBody] List<string> ids)
     {
-        // TODO: Implement service call
-        // _dashboardModuleService.Delete(ids, userId, organizationId);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
         _logger.LogInformation("DeleteDashboardModule called with {Count} ids", ids.Count);
+        await _dashboardModuleService.DeleteAsync(ids, user.Id, user.OrganizationId);
         return Ok();
     }
 
@@ -66,12 +87,17 @@ public class DashboardModuleController : ControllerBase
     /// </summary>
     [HttpGet("tree")]
     // [RequiresPermission(PermissionConstants.DashboardRead)]
-    public IActionResult GetTree()
+    public async Task<IActionResult> GetTree()
     {
-        // TODO: Implement service call
-        // var tree = _dashboardModuleService.GetTree(userId, organizationId);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
         _logger.LogInformation("GetTree called");
-        return Ok(new List<DashboardTreeNode>());
+        var tree = await _dashboardModuleService.GetTreeAsync(user.Id, user.OrganizationId);
+        return Ok(tree);
     }
 
     /// <summary>
@@ -79,12 +105,17 @@ public class DashboardModuleController : ControllerBase
     /// </summary>
     [HttpGet("count")]
     // [RequiresPermission(PermissionConstants.DashboardRead)]
-    public IActionResult ModuleCount()
+    public async Task<IActionResult> ModuleCount()
     {
-        // TODO: Implement service call
-        // var count = _dashboardModuleService.ModuleCount(userId, organizationId);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
         _logger.LogInformation("ModuleCount called");
-        return Ok(new Dictionary<string, long>());
+        var count = await _dashboardModuleService.GetModuleCountAsync(user.Id, user.OrganizationId);
+        return Ok(count);
     }
 
     /// <summary>
@@ -92,17 +123,16 @@ public class DashboardModuleController : ControllerBase
     /// </summary>
     [HttpPost("move")]
     // [RequiresPermission(PermissionConstants.DashboardEdit)]
-    public IActionResult MoveNode([FromBody] NodeMoveRequest request)
+    public async Task<IActionResult> MoveNode([FromBody] DashboardModuleNodeMoveRequest request)
     {
-        // TODO: Implement service call
-        // _dashboardModuleService.MoveNode(request, userId);
+        var user = _sessionUtils.GetUser();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
+        
         _logger.LogInformation("MoveNode called");
+        await _dashboardModuleService.MoveNodeAsync(request.Id, request.TargetId, user.Id);
         return Ok();
     }
 }
-
-// DTO Classes (to be moved to appropriate location)
-public record DashboardModuleAddRequest(string Name, string? ParentId);
-public record DashboardModuleRenameRequest(string Id, string NewName);
-public record DashboardTreeNode(string Id, string Name, List<DashboardTreeNode>? Children);
-public record NodeMoveRequest(string Id, string? TargetId);
