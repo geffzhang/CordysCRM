@@ -39,7 +39,7 @@ public class DashboardModuleService : IDashboardModuleService
         var module = await _repository.GetByIdAsync(id);
         if (module == null)
         {
-            throw new InvalidOperationException("Dashboard Module not found");
+            throw new KeyNotFoundException($"Dashboard Module with ID {id} not found");
         }
 
         module.Name = newName;
@@ -89,7 +89,7 @@ public class DashboardModuleService : IDashboardModuleService
         var module = await _repository.GetByIdAsync(id);
         if (module == null)
         {
-            throw new InvalidOperationException("Dashboard Module not found");
+            throw new KeyNotFoundException($"Dashboard Module with ID {id} not found");
         }
 
         module.ParentId = targetId;

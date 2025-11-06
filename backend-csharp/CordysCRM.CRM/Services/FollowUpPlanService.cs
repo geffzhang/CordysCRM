@@ -47,7 +47,12 @@ public class FollowUpPlanService : IFollowUpPlanService
         var plan = await _repository.GetByIdAsync(request.Id);
         if (plan == null)
         {
-            throw new InvalidOperationException("Follow-Up Plan not found");
+            throw new KeyNotFoundException($"Follow-Up Plan with ID {request.Id} not found");
+        }
+
+        if (plan.OrganizationId != organizationId)
+        {
+            throw new UnauthorizedAccessException("Access denied to this Follow-Up Plan");
         }
 
         if (!string.IsNullOrEmpty(request.Content))
@@ -74,7 +79,12 @@ public class FollowUpPlanService : IFollowUpPlanService
 
     public async Task<FollowUpPlan?> GetAsync(string id, string organizationId)
     {
-        return await _repository.GetByIdAsync(id);
+        var plan = await _repository.GetByIdAsync(id);
+        if (plan != null && plan.OrganizationId != organizationId)
+        {
+            throw new UnauthorizedAccessException("Access denied to this Follow-Up Plan");
+        }
+        return plan;
     }
 
     public async Task UpdateStatusAsync(FollowUpPlanStatusRequest request, string userId)
@@ -82,7 +92,7 @@ public class FollowUpPlanService : IFollowUpPlanService
         var plan = await _repository.GetByIdAsync(request.Id);
         if (plan == null)
         {
-            throw new InvalidOperationException("Follow-Up Plan not found");
+            throw new KeyNotFoundException($"Follow-Up Plan with ID {request.Id} not found");
         }
 
         plan.Status = request.Status;

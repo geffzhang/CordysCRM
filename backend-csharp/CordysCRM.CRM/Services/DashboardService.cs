@@ -42,7 +42,7 @@ public class DashboardService : IDashboardService
         var dashboard = await _repository.GetByIdAsync(request.Id);
         if (dashboard == null)
         {
-            throw new InvalidOperationException("Dashboard not found");
+            throw new KeyNotFoundException($"Dashboard with ID {request.Id} not found");
         }
 
         if (!string.IsNullOrEmpty(request.Name))
@@ -77,7 +77,7 @@ public class DashboardService : IDashboardService
         var dashboard = await _repository.GetByIdAsync(request.Id);
         if (dashboard == null)
         {
-            throw new InvalidOperationException("Dashboard not found");
+            throw new KeyNotFoundException($"Dashboard with ID {request.Id} not found");
         }
 
         dashboard.Name = request.NewName;

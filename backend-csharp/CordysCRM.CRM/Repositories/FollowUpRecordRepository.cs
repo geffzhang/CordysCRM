@@ -57,7 +57,7 @@ public class FollowUpRecordRepository : IFollowUpRecordRepository
         }
 
         return await query
-            .OrderByDescending(r => r.FollowTime ?? r.CreateTime)
+            .OrderByDescending(r => r.FollowTime.HasValue ? r.FollowTime.Value : r.CreateTime ?? 0)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();

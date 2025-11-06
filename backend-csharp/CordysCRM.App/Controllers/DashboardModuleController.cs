@@ -1,3 +1,4 @@
+using CordysCRM.CRM.DTOs.Dashboard;
 using CordysCRM.CRM.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -97,7 +98,7 @@ public class DashboardModuleController : ControllerBase
     /// </summary>
     [HttpPost("move")]
     // [RequiresPermission(PermissionConstants.DashboardEdit)]
-    public async Task<IActionResult> MoveNode([FromBody] NodeMoveRequest request)
+    public async Task<IActionResult> MoveNode([FromBody] DashboardModuleNodeMoveRequest request)
     {
         _logger.LogInformation("MoveNode called");
         var userId = "default-user"; // TODO: Get from session/context
@@ -105,8 +106,3 @@ public class DashboardModuleController : ControllerBase
         return Ok();
     }
 }
-
-// DTO Classes (to be moved to appropriate location)
-public record DashboardModuleAddRequest(string Name, string? ParentId);
-public record DashboardModuleRenameRequest(string Id, string NewName);
-public record NodeMoveRequest(string Id, string? TargetId);

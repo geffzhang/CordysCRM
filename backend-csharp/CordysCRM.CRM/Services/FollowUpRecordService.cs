@@ -45,7 +45,12 @@ public class FollowUpRecordService : IFollowUpRecordService
         var record = await _repository.GetByIdAsync(request.Id);
         if (record == null)
         {
-            throw new InvalidOperationException("Follow-Up Record not found");
+            throw new KeyNotFoundException($"Follow-Up Record with ID {request.Id} not found");
+        }
+
+        if (record.OrganizationId != organizationId)
+        {
+            throw new UnauthorizedAccessException("Access denied to this Follow-Up Record");
         }
 
         if (!string.IsNullOrEmpty(request.Content))
@@ -72,7 +77,12 @@ public class FollowUpRecordService : IFollowUpRecordService
 
     public async Task<FollowUpRecord?> GetAsync(string id, string organizationId)
     {
-        return await _repository.GetByIdAsync(id);
+        var record = await _repository.GetByIdAsync(id);
+        if (record != null && record.OrganizationId != organizationId)
+        {
+            throw new UnauthorizedAccessException("Access denied to this Follow-Up Record");
+        }
+        return record;
     }
 
     public async Task<List<FollowUpRecordListResponse>> GetListAsync(string organizationId, string? userId = null, int page = 1, int pageSize = 20)
