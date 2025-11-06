@@ -22,6 +22,11 @@ public class CrmApplicationDbContext : IdentityDbContext<ApplicationUser, Applic
     public DbSet<Customer> Customers { get; set; }
     public DbSet<Clue> Clues { get; set; }
     public DbSet<Opportunity> Opportunities { get; set; }
+    
+    // System module entities
+    public DbSet<Department> Departments { get; set; }
+    public new DbSet<Role> Roles { get; set; }  // Use 'new' to hide Identity's Roles DbSet
+    public DbSet<ModuleField> ModuleFields { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -85,6 +90,46 @@ public class CrmApplicationDbContext : IdentityDbContext<ApplicationUser, Applic
             entity.Property(e => e.Owner).HasMaxLength(50);
             entity.Property(e => e.Follower).HasMaxLength(50);
             entity.Property(e => e.FailureReason).HasMaxLength(500);
+            entity.Property(e => e.CreateUser).HasMaxLength(50);
+            entity.Property(e => e.UpdateUser).HasMaxLength(50);
+        });
+
+        // Configure Department entity
+        modelBuilder.Entity<Department>(entity =>
+        {
+            entity.ToTable("sys_department");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).HasMaxLength(200);
+            entity.Property(e => e.OrganizationId).HasMaxLength(50);
+            entity.Property(e => e.ParentId).HasMaxLength(50);
+            entity.Property(e => e.Resource).HasMaxLength(50);
+            entity.Property(e => e.ResourceId).HasMaxLength(100);
+            entity.Property(e => e.CreateUser).HasMaxLength(50);
+            entity.Property(e => e.UpdateUser).HasMaxLength(50);
+        });
+
+        // Configure Role entity
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.ToTable("sys_role");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).HasMaxLength(100);
+            entity.Property(e => e.DataScope).HasMaxLength(50);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.OrganizationId).HasMaxLength(50);
+            entity.Property(e => e.CreateUser).HasMaxLength(50);
+            entity.Property(e => e.UpdateUser).HasMaxLength(50);
+        });
+
+        // Configure ModuleField entity
+        modelBuilder.Entity<ModuleField>(entity =>
+        {
+            entity.ToTable("sys_module_field");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.FormId).HasMaxLength(50);
+            entity.Property(e => e.Name).HasMaxLength(200);
+            entity.Property(e => e.InternalKey).HasMaxLength(100);
+            entity.Property(e => e.Type).HasMaxLength(50);
             entity.Property(e => e.CreateUser).HasMaxLength(50);
             entity.Property(e => e.UpdateUser).HasMaxLength(50);
         });
