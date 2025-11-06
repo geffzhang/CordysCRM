@@ -1,3 +1,4 @@
+using CordysCRM.CRM.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CordysCRM.App.Controllers;
@@ -12,14 +13,14 @@ namespace CordysCRM.App.Controllers;
 public class DashboardModuleController : ControllerBase
 {
     private readonly ILogger<DashboardModuleController> _logger;
-    // private readonly IDashboardModuleService _dashboardModuleService;
+    private readonly IDashboardModuleService _dashboardModuleService;
 
     public DashboardModuleController(
-        ILogger<DashboardModuleController> logger)
-        // IDashboardModuleService dashboardModuleService)
+        ILogger<DashboardModuleController> logger,
+        IDashboardModuleService dashboardModuleService)
     {
         _logger = logger;
-        // _dashboardModuleService = dashboardModuleService;
+        _dashboardModuleService = dashboardModuleService;
     }
 
     /// <summary>
@@ -27,12 +28,13 @@ public class DashboardModuleController : ControllerBase
     /// </summary>
     [HttpPost("add")]
     // [RequiresPermission(PermissionConstants.DashboardAdd)]
-    public IActionResult AddFileModule([FromBody] DashboardModuleAddRequest request)
+    public async Task<IActionResult> AddFileModule([FromBody] DashboardModuleAddRequest request)
     {
-        // TODO: Implement service call
-        // var result = _dashboardModuleService.AddFileModule(request, organizationId, userId);
         _logger.LogInformation("AddFileModule called");
-        return Ok(new { message = "Not yet implemented" });
+        var organizationId = "default-org"; // TODO: Get from session/context
+        var userId = "default-user"; // TODO: Get from session/context
+        await _dashboardModuleService.AddFileModuleAsync(request.Name, request.ParentId, organizationId, userId);
+        return Ok();
     }
 
     /// <summary>
@@ -40,11 +42,11 @@ public class DashboardModuleController : ControllerBase
     /// </summary>
     [HttpPost("rename")]
     // [RequiresPermission(PermissionConstants.DashboardEdit)]
-    public IActionResult Rename([FromBody] DashboardModuleRenameRequest request)
+    public async Task<IActionResult> Rename([FromBody] DashboardModuleRenameRequest request)
     {
-        // TODO: Implement service call
-        // _dashboardModuleService.Rename(request, userId);
         _logger.LogInformation("Rename called");
+        var userId = "default-user"; // TODO: Get from session/context
+        await _dashboardModuleService.RenameAsync(request.Id, request.NewName, userId);
         return Ok();
     }
 
@@ -53,11 +55,12 @@ public class DashboardModuleController : ControllerBase
     /// </summary>
     [HttpPost("delete")]
     // [RequiresPermission(PermissionConstants.DashboardDelete)]
-    public IActionResult DeleteDashboardModule([FromBody] List<string> ids)
+    public async Task<IActionResult> DeleteDashboardModule([FromBody] List<string> ids)
     {
-        // TODO: Implement service call
-        // _dashboardModuleService.Delete(ids, userId, organizationId);
         _logger.LogInformation("DeleteDashboardModule called with {Count} ids", ids.Count);
+        var userId = "default-user"; // TODO: Get from session/context
+        var organizationId = "default-org"; // TODO: Get from session/context
+        await _dashboardModuleService.DeleteAsync(ids, userId, organizationId);
         return Ok();
     }
 
@@ -66,12 +69,13 @@ public class DashboardModuleController : ControllerBase
     /// </summary>
     [HttpGet("tree")]
     // [RequiresPermission(PermissionConstants.DashboardRead)]
-    public IActionResult GetTree()
+    public async Task<IActionResult> GetTree()
     {
-        // TODO: Implement service call
-        // var tree = _dashboardModuleService.GetTree(userId, organizationId);
         _logger.LogInformation("GetTree called");
-        return Ok(new List<DashboardTreeNode>());
+        var userId = "default-user"; // TODO: Get from session/context
+        var organizationId = "default-org"; // TODO: Get from session/context
+        var tree = await _dashboardModuleService.GetTreeAsync(userId, organizationId);
+        return Ok(tree);
     }
 
     /// <summary>
@@ -79,12 +83,13 @@ public class DashboardModuleController : ControllerBase
     /// </summary>
     [HttpGet("count")]
     // [RequiresPermission(PermissionConstants.DashboardRead)]
-    public IActionResult ModuleCount()
+    public async Task<IActionResult> ModuleCount()
     {
-        // TODO: Implement service call
-        // var count = _dashboardModuleService.ModuleCount(userId, organizationId);
         _logger.LogInformation("ModuleCount called");
-        return Ok(new Dictionary<string, long>());
+        var userId = "default-user"; // TODO: Get from session/context
+        var organizationId = "default-org"; // TODO: Get from session/context
+        var count = await _dashboardModuleService.GetModuleCountAsync(userId, organizationId);
+        return Ok(count);
     }
 
     /// <summary>
@@ -92,11 +97,11 @@ public class DashboardModuleController : ControllerBase
     /// </summary>
     [HttpPost("move")]
     // [RequiresPermission(PermissionConstants.DashboardEdit)]
-    public IActionResult MoveNode([FromBody] NodeMoveRequest request)
+    public async Task<IActionResult> MoveNode([FromBody] NodeMoveRequest request)
     {
-        // TODO: Implement service call
-        // _dashboardModuleService.MoveNode(request, userId);
         _logger.LogInformation("MoveNode called");
+        var userId = "default-user"; // TODO: Get from session/context
+        await _dashboardModuleService.MoveNodeAsync(request.Id, request.TargetId, userId);
         return Ok();
     }
 }
@@ -104,5 +109,4 @@ public class DashboardModuleController : ControllerBase
 // DTO Classes (to be moved to appropriate location)
 public record DashboardModuleAddRequest(string Name, string? ParentId);
 public record DashboardModuleRenameRequest(string Id, string NewName);
-public record DashboardTreeNode(string Id, string Name, List<DashboardTreeNode>? Children);
 public record NodeMoveRequest(string Id, string? TargetId);
